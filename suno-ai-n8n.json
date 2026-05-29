@@ -1,0 +1,1296 @@
+{
+  "name": "suno-ai-n8n",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -336
+      ],
+      "id": "19272ab9-d862-4f26-9b0e-f6d56367d70a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://studio-api-prod.suno.com/api/c/check",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"ctype\":\"generation\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -448,
+        -208
+      ],
+      "id": "0358f5b0-d649-4695-9e42-03c9614283b2",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "url": "https://studio-api.prod.suno.com/api/billing/info/",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        -320
+      ],
+      "id": "937ac219-3fb3-4cba-8041-c2ebb34cc2c5",
+      "name": "CheckCredit"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/feed/v3",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"filters\":{\"ids\":{\"presence\":\"True\",\"clipIds\":[\"{{ $json.id }}\"]}},\"limit\":2} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        432,
+        224
+      ],
+      "id": "65faa979-342b-4d5e-976b-a8285cc9694a",
+      "name": "GetMetadataClips",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/generate/v2-web/",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"generation_type\": \"TEXT\",\n  \"title\": \"{{ $json.title }}\",\n  \"tags\": \"{{ $json.tags[0] }}\",\n  \"negative_tags\": \"\",\n  \"mv\": \"chirp-auk-turbo\",\n  \"prompt\": {{ JSON.stringify($json.text) }},\n  \"make_instrumental\": false,\n  \"metadata\": {\n    \"web_client_pathname\": \"/create\",\n    \"is_max_mode\": false,\n    \"create_mode\": \"custom\",\n    \"disable_volume_normalization\": false,\n    \"vocal_gender\": \"m\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        224
+      ],
+      "id": "6091e2c4-ffc5-45d7-a7ff-75403e5c6830",
+      "name": "GenMusicClip",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/generate/lyrics-pair",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"prompt\":\"{{ $json.data['Music Theme'] }}\",\"lyrics_model\":\"default\",\"source\":\"create_ui\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -816,
+        224
+      ],
+      "id": "21e6be44-55a0-4ee5-ac69-baff8ec18935",
+      "name": "GenLyrics",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://studio-api-prod.suno.com/api/generate/lyrics/{{ $json.lyrics_a_id }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -432,
+        224
+      ],
+      "id": "10060c17-dd29-4ada-8f6b-fec06c7f9862",
+      "name": "GetLyrics",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/generate/lyrics-infill/",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"prompt\": \"Make it more funny\",\n      \"context_lyrics_prefix\": \"\",\n      \"context_lyrics_edit\": {{ JSON.stringify($json.text)}},\n      \"context_lyrics_suffix\": \"\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -240,
+        144
+      ],
+      "id": "25f52a57-59d6-4bc1-91bf-4fe5da7f5620",
+      "name": "FinetuneLyric",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "**Gen Music With Lyrics**\n\nYou can use your LLM model to gen lyrics or finetune or use default model of Suno to generate lyrics and vibe.\nThe default model for the Free plan is **chirp-auk-turbo**\nIn GenLyrics, and Finetune has **\"prompt\"** that is allow you to modifier the lyrics... \nHere you can input the style you want. Setup for your self.\n",
+        "height": 336,
+        "width": 2388
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1312,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "965ab222-13d7-4e86-9c84-7179452cc8b0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -656,
+        224
+      ],
+      "id": "fbe9444d-e97d-45f9-bc0f-68c49646fece",
+      "name": "Wait",
+      "webhookId": "d6299fdb-accc-4795-9a64-669741b112ab",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "clips",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        192,
+        224
+      ],
+      "id": "0516c2c5-0446-4219-8b73-b4eda289f734",
+      "name": "Split Out",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3361e184-8324-46e7-9b4b-d354b8c3c53f",
+              "leftValue": "={{ $json.clips[0].status }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        144
+      ],
+      "id": "952c8625-7f10-464a-8423-d88fe075054d",
+      "name": "If",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        224
+      ],
+      "id": "5128f5f7-f808-4673-b56b-dd03dbecddc0",
+      "name": "Wait3",
+      "webhookId": "71b41093-cf30-4097-a8c6-d75587bda152",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2132d79f-771c-4b08-9397-0d82b3084410",
+              "leftValue": "={{ $json.required }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        -208
+      ],
+      "id": "4251e16d-c0bd-4600-9b95-45eb90c0014e",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "suno",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        -192
+      ],
+      "id": "171b7086-ffab-473e-9b91-828a808ea1ce",
+      "name": "Webhook",
+      "webhookId": "e2d3c681-9104-44d4-bb2b-1de464e3c427"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fd4c7e13-4a6f-456c-bc1c-374c80daa44d",
+              "leftValue": "={{ ['yes', 'check'].includes(($json.body.original_message.content || '').trim().toLowerCase()) }}",
+              "rightValue": "yes start YES Yes",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -896,
+        -192
+      ],
+      "id": "97da1a26-fe37-41aa-858e-1ad39c3eb112",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "content": "## Verify Token and Captcha\nGet Cookie from Suno (F12)",
+        "height": 464,
+        "width": 1648,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1312,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "ca42f69f-0895-4ab4-bcfe-1e686581a456",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "guildId": {
+          "__rl": true,
+          "value": "1393074976516608160",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://discord.com/channels/1393074976516608160"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1509109294304591932",
+          "mode": "list",
+          "cachedResultName": "suno-noti",
+          "cachedResultUrl": "https://discord.com/channels/1393074976516608160/1509109294304591932"
+        },
+        "message": "Need verify captcha, please login: https://suno.com/create.\nAfter verify please tell me yes to restart!",
+        "approvalOptions": {
+          "values": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -192
+      ],
+      "id": "bbf1fc01-7b2b-4200-a90a-00f702e18297",
+      "name": "Create a channel",
+      "webhookId": "679b861a-8ee5-4a37-a42a-a02761432d12",
+      "credentials": {
+        "discordBotApi": {
+          "id": "wWrBQMBLFJnPnT45",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Gen Music No Lyric\n\nThe current best model for the Pay plan is **chirp-fenix**\n",
+        "height": 400,
+        "width": 2384,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1312,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "17e6af04-2e17-4fe3-a054-c86db79870de",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1393074976516608160",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://discord.com/channels/1393074976516608160"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1509109294304591932",
+          "mode": "list",
+          "cachedResultName": "suno-noti",
+          "cachedResultUrl": "https://discord.com/channels/1393074976516608160/1509109294304591932"
+        },
+        "content": "=Captcha verified.\nRemain Credit:  {{ $json.total_credits_left }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -320
+      ],
+      "id": "c9b8b135-4431-4218-ac32-0dcdab92400b",
+      "name": "Send a message",
+      "webhookId": "2b616a26-c771-4902-bf6f-2ab4f6845f42",
+      "credentials": {
+        "discordBotApi": {
+          "id": "wWrBQMBLFJnPnT45",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/feed/v3",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"filters\":{\"ids\":{\"presence\":\"True\",\"clipIds\":[\"{{ $json.id }}\"]}},\"limit\":2} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        464
+      ],
+      "id": "c7b4fe2a-d570-4880-b20c-40f969b9be55",
+      "name": "GetMetadataClips1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/generate/v2-web/",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"generation_type\": \"TEXT\",\n  \"title\": \"\",\n  \"tags\": \"{{ $json.upsampled }}\",\n  \"negative_tags\": \"\",\n  \"mv\": \"chirp-fenix\",\n  \"prompt\": \"\",\n  \"make_instrumental\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -64,
+        464
+      ],
+      "id": "b6d2b922-45ae-49ae-bb14-00a3242a4a88",
+      "name": "GenMusicClip1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "clips",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        176,
+        464
+      ],
+      "id": "d6ff9249-fd4b-4991-b220-765bd9600128",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3361e184-8324-46e7-9b4b-d354b8c3c53f",
+              "leftValue": "={{ $json.clips[0].status }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        464
+      ],
+      "id": "dc20b80e-ac03-46be-8b81-3ade1a816b94",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        480
+      ],
+      "id": "1b0d7b1c-482a-4063-877c-3d828c07dfc1",
+      "name": "Wait4",
+      "webhookId": "71b41093-cf30-4097-a8c6-d75587bda152"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://studio-api-prod.suno.com/api/prompts/upsample",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('GetToken').item.json.response.sessions[0].last_active_token.jwt }}\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"original_tags\":\"{{ $json.song_prompt }}\",\"is_instrumental\":true}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -272,
+        464
+      ],
+      "id": "b08f3dbb-9564-4103-91aa-7503e5837f71",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -1120,
+        672
+      ],
+      "id": "ff4bd475-afa9-4829-9df1-94bf86b04326",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "u2GxRjefQwvzb44a",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=make a song with 2 songs\n\nReference Music Prompt:\nThe rain help me pass this super hot weather",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=ROLE:\nYou are an expert music prompt engineer.\n\nYour task is to carefully read the reference music prompt provided by the user and use it as the core inspiration to generate multiple song prompts.\nDo NOT change, reinterpret, or override the user’s instructions.\nAlways honor User Instructions as the highest priority.\n\n---\n\nTASK:\nGenerate a JSON array containing song prompt objects.\n\nEach object represents ONE unique song prompt inspired by the reference music prompt.\n\n---\n\nRULES:\n- Each song prompt must be unique while staying consistent with the reference music style, mood, and genre.\n- Do NOT include explanations, markdown, comments, or any text outside the JSON array.\n\n---\n\nOUTPUT FORMAT:\nReturn ONLY valid JSON in the following structure:\n\n[\n  {\n    \"song\": 1,\n    \"song_prompt\": \"detailed music prompt here\"\n  },\n  {\n    \"song\": 2,\n    \"song_prompt\": \"detailed music prompt here\"\n  },\n  {\n    \"song\": 3,\n    \"song_prompt\": \"detailed music prompt here\"\n  },\n  {\n    \"song\": 4,\n    \"song_prompt\": \"detailed music prompt here\"\n  },\n  {\n    \"song\": 5,\n    \"song_prompt\": \"detailed music prompt here\"\n  }\n]\n"
+        }
+      },
+      "id": "04acdca1-5fc3-4a53-b556-be898553a143",
+      "name": "Generate Music Prompts (AI Agent)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1072,
+        496
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"songs\": [\n    {\n      \"song\": 1,\n      \"song_prompt\": \"string\"\n    }\n  ]\n}\n"
+      },
+      "id": "312f5357-cc29-44a7-91f3-33731f3dca30",
+      "name": "Music Prompt Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -912,
+        672
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.songs",
+        "options": {}
+      },
+      "id": "1a38bde5-a5a4-4e80-858b-3017d8fba6f7",
+      "name": "Split Music Requests",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -736,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "maxItems": 2
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        464
+      ],
+      "id": "4396b2f0-3057-4dac-bdac-b26c0b8004ad",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "url": "https://auth.suno.com/v1/client?__clerk_api_version=2025-11-10&_clerk_js_version=5.117.0",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -640,
+        -208
+      ],
+      "id": "23593a83-7483-4a35-a3d2-455162a45e56",
+      "name": "GetToken"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1S8qISqGyZa66qW0szA3d8GkYHkGLRCLj0CCRifpVMS4",
+          "mode": "list",
+          "cachedResultName": "N8N-All-Sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S8qISqGyZa66qW0szA3d8GkYHkGLRCLj0CCRifpVMS4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1968300547,
+          "mode": "list",
+          "cachedResultName": "suno-metadata",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S8qISqGyZa66qW0szA3d8GkYHkGLRCLj0CCRifpVMS4/edit#gid=1968300547"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $json.clips[0].title }}",
+            "id_clips": "={{ $json.clips[0].id }}",
+            "m4a_url": "={{ $json.clips[0].media_urls[0].url }}",
+            "mp3_url": "={{ $json.clips[0].audio_url }}",
+            "image_url": "={{ $json.clips[0].image_url }}",
+            "metadata_json": "={{ $json.clips[0].metadata }}",
+            "display_tags": "={{ $json.clips[0].display_tags }}",
+            "created_at": "={{ $json.clips[0].created_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id_clips",
+              "displayName": "id_clips",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mp3_url",
+              "displayName": "mp3_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "m4a_url",
+              "displayName": "m4a_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "metadata_json",
+              "displayName": "metadata_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "display_tags",
+              "displayName": "display_tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "locationDefine": {
+            "values": {}
+          }
+        }
+      },
+      "id": "b19eaf01-7b7b-4cac-833c-401853815829",
+      "name": "Log Song Metadata",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1120,
+        448
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0ymL0iCug65NDJlC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "d9447da6-e670-47eb-b646-10c1d66d6267",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "2fa44dbd-3fc3-40ee-b178-3882aece0652",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "b6a3e335-18c0-4642-bc25-5e411ca26235",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "11360804-a7f9-4180-be4e-a1b627745180",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "2d5fdbf1-fa51-4a9d-a1aa-815192af88cc",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "ab4b8395-6606-48ff-80a7-a02b727dc702",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# 🛠️ Workflow Setup Guide\n\nAuthor: [Datnd](https://www.youtube.com/@daity2609)\n\n## How It Works\n\nThis workflow automates the process of generating music with Suno AI.\n\n- Users submit music themes, background video URLs, and the number of tracks through an input form.\n- An AI agent generates structured Suno music prompts based on the provided theme.\n- Suno AI creates multiple music tracks, and the workflow waits until the generation process is completed.\n- The workflow uses Suno’s internal API to generate music.\n\n---\n\n## Setup Guide\n\n[n8n](https://n8n.partnerlinks.io/giangxai)\n\nTo set up the workflow, you need to:\n\n- Connect an AI model, such as Gemini, for music prompt generation and SEO metadata creation.\n- Add your Suno Cookie. You can find instructions on how to get the cookie in my GitHub repository.\n- Review and customize the input form fields if needed.\n\nThe setup process is simple and does not require video editing or coding experience.\n\n---\n\n## GitHub Repository\n\nRepository: https://github.com/datnndd/suno-ai-automation.git\n\nIn this version, I do not concatenate audio with background video because n8n Cloud is not suitable for running FFmpeg. FFmpeg works better in a local environment.\n\nIf you want to see a different version with more advanced processing, you can visit my GitHub repository. There, you can also find other Suno AI endpoints and related automation examples.\n\n---\n\n## Contact\n\nIf you want to contact me or build something fun together, feel free to reach out:\n\n- Email: nddat8888@gmail.com\n- Telegram: @datnd444",
+        "height": 960,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        -384
+      ],
+      "id": "940255ec-a753-4cdf-8104-7649247f7a89",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "guildId": {
+          "__rl": true,
+          "value": "1393074976516608160",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://discord.com/channels/1393074976516608160"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1509109294304591932",
+          "mode": "list",
+          "cachedResultName": "suno-noti",
+          "cachedResultUrl": "https://discord.com/channels/1393074976516608160/1509109294304591932"
+        },
+        "message": "Put text in form to create with your idea:",
+        "responseType": "customForm",
+        "defineForm": "json",
+        "jsonOutput": "[\n  {\n    \"fieldLabel\": \"Music Theme\",\n    \"placeholder\": \"\",\n    \"requiredField\": true\n  },\n  {\n    \"fieldLabel\": \"Number of tracks\",\n    \"fieldType\": \"number\",\n    \"placeholder\": \"\"\n  }\n]\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -160
+      ],
+      "id": "e8636757-7add-4ab0-9c48-45f75b0fd937",
+      "name": "Create Form",
+      "webhookId": "525d441a-c2c3-44b4-bac9-dc4a00c49a66",
+      "credentials": {
+        "discordBotApi": {
+          "id": "wWrBQMBLFJnPnT45",
+          "name": "Discord Bot account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "GetToken",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetMetadataClips": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CheckCredit": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenMusicClip": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenLyrics": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetLyrics": {
+      "main": [
+        [
+          {
+            "node": "FinetuneLyric",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GenMusicClip",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FinetuneLyric": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "GetLyrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "GetMetadataClips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "GetMetadataClips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "CheckCredit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "GetToken",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Create a channel": {
+      "main": [
+        [
+          {
+            "node": "GetToken",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetMetadataClips1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenMusicClip1": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "GetMetadataClips1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Log Song Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "GetMetadataClips1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "GenMusicClip1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Music Prompts (AI Agent)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Create Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Music Prompt Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Music Prompts (AI Agent)",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Music Prompts (AI Agent)": {
+      "main": [
+        [
+          {
+            "node": "Split Music Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Music Requests": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetToken": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Form": {
+      "main": [
+        [
+          {
+            "node": "Generate Music Prompts (AI Agent)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GenLyrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f048e9b2-c02b-4f9b-88bd-285abf22d20c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "51d54f10d3396ab178aaac992062c89b4485f997ed01e6becf8aef6fad49e91e"
+  },
+  "id": "jxrMnkUWTlYH3rn9",
+  "tags": []
+}
